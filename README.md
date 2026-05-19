@@ -1,10 +1,12 @@
 # ddg-search-mcp
 
-DuckDuckGo Search MCP Server. Uses DuckDuckGo's HTML search via the `duckduckgo-search` library — no API key required.
+DuckDuckGo Search MCP Server. Scrapes DuckDuckGo HTML directly — no API key or third-party library needed.
 
 ## Features
 
 - Searches DuckDuckGo and returns results with titles, URLs, and snippets
+- Full page content extraction via Trafilatura (falls back to snippet on failure)
+- Concurrent page fetching for low latency
 - Region support (global, country-specific)
 - No API key or authentication needed
 - Built with FastMCP (Python MCP SDK)
@@ -35,7 +37,7 @@ Then use `uvx` directly in your config (no clone or pip install needed):
     "mcp": {
         "ddg-search": {
             "type": "local",
-            "command": ["uvx", "--from", "git+https://github.com/Albertous007/ddg-search-mcp", "python", "server.py"],
+            "command": ["uvx", "--from", "git+https://github.com/Albertous007/ddg-search-mcp@main", "python", "-m", "server"],
             "enabled": true
         }
     }
@@ -65,7 +67,7 @@ With `uvx` (auto-installs dependencies):
     "mcp": {
         "ddg-search": {
             "type": "local",
-            "command": ["uvx", "--from", "git+https://github.com/Albertous007/ddg-search-mcp", "python", "server.py"],
+            "command": ["uvx", "--from", "git+https://github.com/Albertous007/ddg-search-mcp@main", "python", "-m", "server"],
             "enabled": true
         }
     }
@@ -98,33 +100,18 @@ DuckDuckGo aggressively rate-limits requests from a single IP. When triggered, D
 
 **Symptoms:** The tool returns `No results found` for all queries, even simple ones.
 
-**Why it happens:** DuckDuckGo detects repeated searches from the same source and challenges them. This MCP makes a real HTTP request (via the `duckduckgo-search` library), and DDG treats it like any other browser request. Too many searches = CAPTCHA.
+**Why it happens:** DuckDuckGo detects repeated searches from the same source and challenges them. This MCP makes direct HTTP requests to DDG's HTML endpoint, and DDG treats it like any other browser request. Too many searches = CAPTCHA.
 
 **Fix:** Wait a few hours. The rate limit expires automatically. Spread out searches to avoid triggering it. There is no way to solve the visual CAPTCHA programmatically.
 
-### Inaccurate results for compound queries
+### HTML structure changes
 
-Some compound queries (e.g., "nvidia mgx") may return generic results instead of specific ones. The `duckduckgo-search` library processes the query through DDG's HTML endpoint, and DDG's matching algorithm may prioritize different terms or return category pages.
-
-**Workaround:** Use more specific query terms, or try different regions.
-
-### Library deprecation warning
-
-The `duckduckgo-search` Python package has been renamed to `ddgs`. Using the old import produces a `RuntimeWarning`:
-```
-RuntimeWarning: This package (`duckduckgo_search`) has been renamed to `ddgs`! Use `pip install ddgs` instead.
-```
-
-This is cosmetic and does not affect functionality. It will be updated in a future release.
-
-### HTML dependency
-
-This MCP relies on the `duckduckgo-search` library which scrapes DuckDuckGo's HTML. If DDG changes their HTML structure, the library may need to be updated. The library is actively maintained.
+This MCP scrapes DuckDuckGo's HTML directly. If DDG changes their HTML structure, the parsing logic in `server.py` may need to be updated.
 
 ## Development
 
 ```bash
-pip install mcp duckduckgo-search
+pip install -r requirements.txt
 python server.py
 ```
 
@@ -138,8 +125,10 @@ mcp dev server.py
 ## Requirements
 
 - Python 3.10+
+- `httpx` (HTTP client)
+- `beautifulsoup4` (HTML parsing)
+- `trafilatura` (content extraction)
 - `mcp` (MCP Python SDK)
-- `duckduckgo-search` (HTML scraping library)
 
 ## License
 
