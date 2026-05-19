@@ -249,7 +249,7 @@ def parse_html(html: str, num: int) -> list[dict]:
 # ── MCP Tool ─────────────────────────────────────────────────────────────────
 
 @mcp.tool()
-def search(query: str, count: int = 10, region: str = "wt-wt") -> str:
+async def search(query: str, count: int = 10, region: str = "wt-wt") -> str:
     """Search DuckDuckGo and return web results with titles, URLs, and snippets.
 
     Scrapes DuckDuckGo HTML directly (no API key needed). For each result,
@@ -264,48 +264,41 @@ def search(query: str, count: int = 10, region: str = "wt-wt") -> str:
     count = max(1, min(count, 20))
 
     try:
-        import asyncio as _asyncio
-        loop = _asyncio.new_event_loop()
-        _asyncio.set_event_loop(loop)
+        async with httpx.AsyncClient(headers=HEADERS) as client:
+            results = await ddg_search(client, query, count)
+            if not results:
+                return f"No results found for: {query}"
 
-        async def run():
-            async with httpx.AsyncClient(headers=HEADERS) as client:
-                results = await ddg_search(client, query, count)
-                if not results:
-                    return f"No results found for: {query}"
+            fetch_tasks = [fetch_page(client, r["url"]) for r in results]
+            page_data = await asyncio.gather(*fetch_tasks)
 
-                fetch_tasks = [fetch_page(client, r["url"]) for r in results]
-                page_data = await _asyncio.gather(*fetch_tasks)
+        full_results = []
+        fallback_results = []
 
-            full_results = []
-            fallback_results = []
+        for result, (content, is_full) in zip(results, page_data):
+            title = result["title"]
+            url = result["url"]
+            snippet = result["snippet"]
 
-            for result, (content, is_full) in zip(results, page_data):
-                title = result["title"]
-                url = result["url"]
-                d = domain(url)
-                snippet = result["snippet"]
+            if is_full:
+                entry = (
+                    f"{len(full_results) + 1}. {title}\n"
+                    f"   URL: {url}\n"
+                    f"   {content}"
+                )
+                full_results.append(entry)
+            else:
+                body = snippet if snippet else "_Page content unavailable._"
+                entry = (
+                    f"{len(full_results) + len(fallback_results) + 1}. {title}\n"
+                    f"   URL: {url}\n"
+                    f"   {body}"
+                )
+                fallback_results.append(entry)
 
-                if is_full:
-                    entry = (
-                        f"{len(full_results) + 1}. {title}\n"
-                        f"   URL: {url}\n"
-                        f"   {content}"
-                    )
-                    full_results.append(entry)
-                else:
-                    body = snippet if snippet else "_Page content unavailable._"
-                    entry = (
-                        f"{len(full_results) + len(fallback_results) + 1}. {title}\n"
-                        f"   URL: {url}\n"
-                        f"   {body}"
-                    )
-                    fallback_results.append(entry)
+        ordered = full_results + fallback_results
+        return "\n\n".join(ordered)
 
-            ordered = full_results + fallback_results
-            return "\n\n".join(ordered)
-
-        return loop.run_until_complete(run())
     except Exception as e:
         return f"Search failed: {e}"
 
