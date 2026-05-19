@@ -1,1 +1,133 @@
-# ddg-search-mcp\n\nDuckDuckGo Search MCP Server. Scrapes DuckDuckGo HTML directly — no API key required.\n\n## Features\n\n- **Anti-bot protection**: Uses `curl_cffi` to mimic a real Chrome 131 TLS fingerprint, bypassing many bot detection systems.\n- **Rate limiting**: Built-in delay between search requests to prevent triggering DuckDuckGo CAPTCHAs.\n- **Content extraction**: Full page content extraction via Trafilatura (falls back to snippet on failure).\n- **Concurrent page fetching**: Low latency for result gathering.\n- **Region support**: Supports global and country-specific searches.\n- **No API key needed**: Operates entirely on public HTML results.\n\n## Installation\n\n### Standard (recommended)\n\n```bash\ngit clone https://github.com/Albertous007/ddg-search-mcp.git\ncd ddg-search-mcp\npip install -r requirements.txt\n```\n\n### Alternative: using `uvx`\n\nIf you have [`uv`](https://docs.astral.sh/uv/) installed:\n\n```bash\npip install uv   # one-time setup\n```\n\nThen use `uvx` directly in your config (no clone or pip install needed):\n\n```json\n{\n    \"mcp\": {\n        \"ddg-search\": {\n            \"type\": \"local\",\n            \"command\": [\"uvx\", \"--from\", \"git+https://github.com/Albertous007/ddg-search-mcp@main\", \"python\", \"-m\", \"server\"],\n            \"enabled\": true\n        }\n    }\n}\n```\n\n## Usage with opencode\n\nStandard installation:\n\n```json\n{\n    \"mcp\": {\n        \"ddg-search\": {\n            \"type\": \"local\",\n            \"command\": [\"python\", \"path\\\\to\\\\ddg-search-mcp\\\\server.py\"],\n            \"enabled\": true\n        }\n    }\n}\n```\n\nWith `uvx` (auto-installs dependencies):\n\n```json\n{\n    \"mcp\": {\n        \"ddg-search\": {\n            \"type\": \"local\",\n            \"command\": [\"uvx\", \"--from\", \"git+https://github.com/Albertous007/ddg-search-mcp@main\", \"python\", \"-m\", \"server\"],\n            \"enabled\": true\n        }\n    }\n}\n```\n\n## Tool: `search`\n\n| Parameter | Required | Default | Description |\n|-----------|----------|---------|-------------|\n| `query`   | Yes      | —       | Search terms |\n| `count`   | No       | 10      | Max results (1–20) |\n| `region`  | No       | wt-wt   | Region: wt-wt (global), us-en (USA), mx-es (Mexico), etc. |\n\n## Cross-platform\n\nWorks on Windows, Linux, and macOS. Requires only Python 3.10+.\n\n| OS | Setup |\n|----|-------|\n| Windows | `pip install -r requirements.txt` |\n| Linux | `pip install -r requirements.txt` |\n| macOS | `pip install -r requirements.txt` |\n\n## Known Issues\n\n### Rate limiting (CAPTCHA)\n\nDuckDuckGo aggressively rate-limits requests from a single IP. While this MCP includes **built-in rate limiting** and **browser impersonation** to mitigate this, excessive queries in a short period may still trigger a CAPTCHA.\n\n**Symptoms:** The tool returns `No results found` for all queries.\n\n**Fix:** If blocked, wait a few minutes to an hour. The rate limit expires automatically. The integrated 2.0s delay between searches is designed to prevent this under normal usage.\n\n### HTML structure changes\n\nThis MCP scrapes DuckDuckGo's HTML directly. If DDG changes their HTML structure, the parsing logic in `server.py` may need to be updated.\n\n## Development\n\n```bash\npip install -r requirements.txt\npython server.py\n```\n\nTest with MCP Inspector:\n\n```bash\npip install mcp[cli]\nmcp dev server.py\n```\n\n## Requirements\n\n- Python 3.10+\n- `curl_cffi` (Advanced HTTP client with TLS fingerprinting)\n- `beautifulsoup4` (HTML parsing)\n- `trafilatura` (content extraction)\n- `mcp` (MCP Python SDK)\n\n## License\n\nMIT\n
+# ddg-search-mcp
+
+DuckDuckGo Search MCP Server. Scrapes DuckDuckGo HTML results — no API key required.
+
+## Features
+
+- **Anti-bot protection**: Uses `curl_cffi` to mimic a real Chrome 131 TLS fingerprint, bypassing many bot detection systems.
+- **DuckDuckGo Lite**: Uses the Lite version of DDG for higher reliability and faster parsing.
+- **Rate limiting & Retries**: Built-in 3.0s delay between search requests and automatic retry logic to ensure results even under heavy use.
+- **Content extraction**: Full page content extraction via Trafilatura (falls back to snippet on failure).
+- **Concurrent page fetching**: Low latency for gathering full content from search results.
+- **Region support**: Supports global and country-specific searches.
+- **No API key needed**: Operates entirely on public HTML results.
+
+## Installation
+
+### Standard (recommended)
+
+```bash
+git clone https://github.com/Albertous007/ddg-search-mcp.git
+cd ddg-search-mcp
+pip install -r requirements.txt
+```
+
+### Alternative: using `uvx`
+
+If you have [`uv`](https://docs.astral.sh/uv/) installed:
+
+```bash
+pip install uv   # one-time setup
+```
+
+Then use `uvx` directly in your config (no clone or pip install needed):
+
+```json
+{
+    "mcp": {
+        "ddg-search": {
+            "type": "local",
+            "command": ["uvx", "--from", "git+https://github.com/Albertous007/ddg-search-mcp@main", "python", "-m", "server"],
+            "enabled": true
+        }
+    }
+}
+```
+
+## Usage with opencode
+
+Standard installation:
+
+```json
+{
+    "mcp": {
+        "ddg-search": {
+            "type": "local",
+            "command": ["python", "path\\to\\ddg-search-mcp\\server.py"],
+            "enabled": true
+        }
+    }
+}
+```
+
+With `uvx` (auto-installs dependencies):
+
+```json
+{
+    "mcp": {
+        "ddg-search": {
+            "type": "local",
+            "command": ["uvx", "--from", "git+https://github.com/Albertous007/ddg-search-mcp@main", "python", "-m", "server"],
+            "enabled": true
+        }
+    }
+}
+```
+
+## Tool: `search`
+
+| Parameter | Required | Default | Description |
+|-----------|----------|---------|-------------|
+| `query`   | Yes      | —       | Search terms |
+| `count`   | No       | 10      | Max results (1–20) |
+| `region`  | No       | wt-wt   | Region: wt-wt (global), us-en (USA), mx-es (Mexico), etc. |
+
+## Cross-platform
+
+Works on Windows, Linux, and macOS. Requires only Python 3.10+.
+
+| OS | Setup |
+|----|-------|
+| Windows | `pip install -r requirements.txt` |
+| Linux | `pip install -r requirements.txt` |
+| macOS | `pip install -r requirements.txt` |
+
+## Known Issues
+
+### Rate limiting (CAPTCHA)
+
+DuckDuckGo aggressively rate-limits requests from a single IP. This MCP uses **DuckDuckGo Lite**, **browser impersonation**, and an integrated **3.0s delay** with **auto-retries** to be as robust as possible.
+
+**Symptoms:** The tool returns `No results found` for all queries.
+
+**Fix:** If blocked, wait a few minutes. The rate limit expires automatically. The current 3.0s delay is designed to prevent this under normal usage.
+
+### HTML structure changes
+
+This MCP scrapes DuckDuckGo's HTML directly. If DDG changes their HTML structure, the parsing logic in `server.py` may need to be updated.
+
+## Development
+
+```bash
+pip install -r requirements.txt
+python server.py
+```
+
+Test with MCP Inspector:
+
+```bash
+pip install mcp[cli]
+mcp dev server.py
+```
+
+## Requirements
+
+- Python 3.10+
+- `curl_cffi` (Advanced HTTP client with TLS fingerprinting)
+- `beautifulsoup4` (HTML parsing)
+- `trafilatura` (content extraction)
+- `mcp` (MCP Python SDK)
+
+## License
+
+MIT
