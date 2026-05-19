@@ -238,7 +238,6 @@ def parse_html(html: str, num: int) -> list[dict]:
                 if snippet_el:
                     raw = snippet_el.get_text(strip=True)
                     raw = re.sub(r'([a-záéíóúñ])(\d)', r'\1 \2', raw, flags=re.I)
-                    raw = re.sub(r'(\d)([a-záéíóúñ])', r'\1 \2', raw, flags=re.I)
                     snippet = raw[:MAX_SNIPPET_CHARS]
         
         results.append({"title": title, "url": real_url, "snippet": snippet})
@@ -267,7 +266,6 @@ def parse_html(html: str, num: int) -> list[dict]:
             if snippet_el:
                 raw = snippet_el.get_text(strip=True)
                 raw = re.sub(r'([a-záéíóúñ])(\d)', r'\1 \2', raw, flags=re.I)
-                raw = re.sub(r'(\d)([a-záéíóúñ])', r'\1 \2', raw, flags=re.I)
                 snippet = raw[:MAX_SNIPPET_CHARS]
             else:
                 snippet = ""
