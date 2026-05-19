@@ -1,16 +1,16 @@
 # ddg-search-mcp
 
-DuckDuckGo Search MCP Server. Scrapes DuckDuckGo HTML results — no API key required.
+DuckDuckGo Search MCP Server. Scrapes DuckDuckGo Lite directly — no API key required. Highly robust against bot detection.
 
 ## Features
 
-- **Anti-bot protection**: Uses `curl_cffi` to mimic a real Chrome 131 TLS fingerprint, bypassing many bot detection systems.
-- **DuckDuckGo Lite**: Uses the Lite version of DDG for higher reliability and faster parsing.
-- **Rate limiting & Retries**: Built-in 3.0s delay between search requests and automatic retry logic to ensure results even under heavy use.
-- **Content extraction**: Full page content extraction via Trafilatura (falls back to snippet on failure).
-- **Concurrent page fetching**: Low latency for gathering full content from search results.
-- **Region support**: Supports global and country-specific searches.
-- **No API key needed**: Operates entirely on public HTML results.
+- **Advanced Anti-bot Protection**: Uses `curl_cffi` to mimic a real Chrome 131 TLS fingerprint (JA3), seamlessly bypassing most bot detection and CAPTCHA systems.
+- **DuckDuckGo Lite**: Leverages the Lite version of DuckDuckGo for faster parsing and significantly higher reliability compared to the standard HTML version.
+- **Smart Rate Limiting & Retries**: Integrated 3.0s delay between searches and automatic retry logic to ensure stable results even during intensive use.
+- **Full Content Extraction**: Deep extraction of page content via `trafilatura` (with automatic snippet fallback on fetch failure).
+- **Concurrent Processing**: Page content is fetched in parallel to minimize latency.
+- **Full Region Support**: Real support for regional searches (e.g., `es-es` for Spain, `mx-es` for Mexico) using the native DuckDuckGo `kl` parameter.
+- **Zero Configuration**: No API keys, accounts, or complex setup required.
 
 ## Installation
 
@@ -80,7 +80,7 @@ With `uvx` (auto-installs dependencies):
 |-----------|----------|---------|-------------|
 | `query`   | Yes      | —       | Search terms |
 | `count`   | No       | 10      | Max results (1–20) |
-| `region`  | No       | wt-wt   | Region: wt-wt (global), us-en (USA), mx-es (Mexico), etc. |
+| `region`  | No       | wt-wt   | Region: wt-wt (global), us-en (USA), es-es (Spain), etc. |
 
 ## Cross-platform
 
