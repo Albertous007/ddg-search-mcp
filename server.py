@@ -65,7 +65,7 @@ def extract_real_url(href: str) -> str | None:
 
 def normalize(text: str) -> str:
     text = unicodedata.normalize("NFKC", text)
-    text = re.sub(r"\\s{3,}", "\\n\\n", text)
+    text = re.sub(r"\s{3,}", "\n\n", text)
     text = re.sub(r" {2,}", " ", text)
     return text.strip()
 
@@ -78,11 +78,11 @@ def dedupe_lines(text: str) -> str:
         if not stripped:
             out.append("")
             continue
-        key = hashlib.md5(re.sub(r"\\W+", "", stripped.lower()).encode()).hexdigest()
+        key = hashlib.md5(re.sub(r"\W+", "", stripped.lower()).encode()).hexdigest()
         if key not in seen:
             seen.add(key)
             out.append(line)
-    return "\\n".join(out)
+    return "\n".join(out)
 
 
 def clean_content(raw: str) -> str:
@@ -91,12 +91,12 @@ def clean_content(raw: str) -> str:
     lines = [
         l for l in text.splitlines()
         if not re.match(
-            r"^\\s*(share|tweet|follow us|subscribe|sign up|log in|cookie|privacy policy"
-            r"|terms of service|all rights reserved|©|\\d+ comments?)\\s*$",
+            r"^\s*(share|tweet|follow us|subscribe|sign up|log in|cookie|privacy policy"
+            r"|terms of service|all rights reserved|©|\d+ comments?)\s*$",
             l, re.IGNORECASE
         )
     ]
-    return "\\n".join(lines).strip()
+    return "\n".join(lines).strip()
 
 
 def domain(url: str) -> str:
@@ -304,22 +304,22 @@ async def search(query: str, count: int = 10, region: str = "wt-wt") -> str:
 
             if is_full:
                 entry = (
-                    f"{len(full_results) + 1}. {title}\\n"
-                    f"   URL: {url}\\n"
+                    f"{len(full_results) + 1}. {title}\n"
+                    f"   URL: {url}\n"
                     f"   {content}"
                 )
                 full_results.append(entry)
             else:
                 body = snippet if snippet else "_Page content unavailable._"
                 entry = (
-                    f"{len(full_results) + len(fallback_results) + 1}. {title}\\n"
-                    f"   URL: {url}\\n"
+                    f"{len(full_results) + len(fallback_results) + 1}. {title}\n"
+                    f"   URL: {url}\n"
                     f"   {body}"
                 )
                 fallback_results.append(entry)
 
         ordered = full_results + fallback_results
-        return "\\n\\n".join(ordered)
+        return "\n\n".join(ordered)
 
     except Exception as e:
         return f"Search failed: {e}"
