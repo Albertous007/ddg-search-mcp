@@ -92,13 +92,30 @@ Works on Windows, Linux, and macOS. Requires only Python 3.10+.
 
 ## Known Issues
 
-### Rate limiting
+### Rate limiting (visual CAPTCHA)
 
-DuckDuckGo may temporarily block requests if too many searches are made in a short period. When rate-limited, DDG returns a visual CAPTCHA ("Select all squares containing a duck") that cannot be solved programmatically.
+DuckDuckGo aggressively rate-limits requests from a single IP. When triggered, DDG returns a visual CAPTCHA page ("Unfortunately, bots use DuckDuckGo too — Select all squares containing a duck") instead of search results.
 
-**Symptoms:** `No results found` or empty responses for all queries.
+**Symptoms:** The tool returns `No results found` for all queries, even simple ones.
 
-**Fix:** Wait a few hours. The rate limit expires automatically. Spread out searches to avoid triggering it.
+**Why it happens:** DuckDuckGo detects repeated searches from the same source and challenges them. This MCP makes a real HTTP request (via the `duckduckgo-search` library), and DDG treats it like any other browser request. Too many searches = CAPTCHA.
+
+**Fix:** Wait a few hours. The rate limit expires automatically. Spread out searches to avoid triggering it. There is no way to solve the visual CAPTCHA programmatically.
+
+### Inaccurate results for compound queries
+
+Some compound queries (e.g., "nvidia mgx") may return generic results instead of specific ones. The `duckduckgo-search` library processes the query through DDG's HTML endpoint, and DDG's matching algorithm may prioritize different terms or return category pages.
+
+**Workaround:** Use more specific query terms, or try different regions.
+
+### Library deprecation warning
+
+The `duckduckgo-search` Python package has been renamed to `ddgs`. Using the old import produces a `RuntimeWarning`:
+```
+RuntimeWarning: This package (`duckduckgo_search`) has been renamed to `ddgs`! Use `pip install ddgs` instead.
+```
+
+This is cosmetic and does not affect functionality. It will be updated in a future release.
 
 ### HTML dependency
 
