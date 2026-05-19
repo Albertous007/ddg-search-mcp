@@ -236,7 +236,10 @@ def parse_html(html: str, num: int) -> list[dict]:
             if next_tr:
                 snippet_el = next_tr.select_one(".result-snippet")
                 if snippet_el:
-                    snippet = snippet_el.get_text(strip=True)[:MAX_SNIPPET_CHARS]
+                    raw = snippet_el.get_text(strip=True)
+                    raw = re.sub(r'([a-záéíóúñ])(\d)', r'\1 \2', raw, flags=re.I)
+                    raw = re.sub(r'(\d)([a-záéíóúñ])', r'\1 \2', raw, flags=re.I)
+                    snippet = raw[:MAX_SNIPPET_CHARS]
         
         results.append({"title": title, "url": real_url, "snippet": snippet})
 
@@ -261,7 +264,13 @@ def parse_html(html: str, num: int) -> list[dict]:
             if not title:
                 continue
             snippet_el = el.select_one(".result__snippet")
-            snippet = snippet_el.get_text(strip=True)[:MAX_SNIPPET_CHARS] if snippet_el else ""
+            if snippet_el:
+                raw = snippet_el.get_text(strip=True)
+                raw = re.sub(r'([a-záéíóúñ])(\d)', r'\1 \2', raw, flags=re.I)
+                raw = re.sub(r'(\d)([a-záéíóúñ])', r'\1 \2', raw, flags=re.I)
+                snippet = raw[:MAX_SNIPPET_CHARS]
+            else:
+                snippet = ""
             results.append({"title": title, "url": real_url, "snippet": snippet})
 
     return results
