@@ -1,1 +1,4 @@
-mcp>=1.0.0\ncurl_cffi>=0.7.0\nbeautifulsoup4>=4.12.0\ntrafilatura>=1.6.0\n
+mcp>=1.0.0
+curl_cffi>=0.7.0
+beautifulsoup4>=4.12.0
+trafilatura>=1.6.0
