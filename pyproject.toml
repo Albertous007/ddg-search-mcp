@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "ddg-search-mcp"
+name = "ddg-search-mcp-Albertous007"
 version = "1.0.1"
 authors = [{ name = "Albertous007" }]
 description = "DuckDuckGo Search MCP Server with anti-bot protection"

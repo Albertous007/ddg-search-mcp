@@ -1,17 +1,17 @@
 # ddg-search-mcp
 
-[![PyPI version](https://img.shields.io/pypi/v/ddg-search-mcp)](https://pypi.org/project/ddg-search-mcp/)
-[![Python versions](https://img.shields.io/pypi/pyversions/ddg-search-mcp)](https://pypi.org/project/ddg-search-mcp/)
-[![License](https://img.shields.io/pypi/l/ddg-search-mcp)](LICENSE)
+[![PyPI version](https://img.shields.io/pypi/v/ddg-search-mcp-Albertous007)](https://pypi.org/project/ddg-search-mcp-Albertous007/)
+[![Python versions](https://img.shields.io/pypi/pyversions/ddg-search-mcp-Albertous007)](https://pypi.org/project/ddg-search-mcp-Albertous007/)
+[![License](https://img.shields.io/pypi/l/ddg-search-mcp-Albertous007)](LICENSE)
 
 DuckDuckGo Search MCP Server. Scrapes DuckDuckGo Lite directly — no API key required, no rate limits, robust anti-bot protection.
 
 ## Quick Start
 
 ```bash
-pip install ddg-search-mcp
+pip install ddg-search-mcp-Albertous007
 # or
-uvx ddg-search-mcp
+uvx ddg-search-mcp-Albertous007
 ```
 
 ### From source (before PyPI release)
@@ -29,7 +29,7 @@ Add to your MCP client:
     "mcpServers": {
         "ddg-search": {
             "command": "uvx",
-            "args": ["ddg-search-mcp"]
+            "args": ["ddg-search-mcp-Albertous007"]
         }
     }
 }
@@ -62,7 +62,7 @@ Add to your MCP client:
 ### From PyPI (recommended)
 
 ```bash
-pip install ddg-search-mcp
+pip install ddg-search-mcp-Albertous007
 ```
 
 ### From source
@@ -110,7 +110,7 @@ After `pip install`, the installed console script is the simplest option:
     "mcp": {
         "ddg-search": {
             "type": "local",
-            "command": ["uvx", "ddg-search-mcp"],
+            "command": ["uvx", "ddg-search-mcp-Albertous007"],
             "enabled": true
         }
     }
