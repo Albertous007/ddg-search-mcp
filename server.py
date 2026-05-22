@@ -68,6 +68,7 @@ MAX_RESULTS_CAP = _env_int("DDG_MAX_RESULTS", "10")
 SEARCH_DELAY = _env_float("DDG_SEARCH_DELAY", "3.0")
 
 _last_search_time = 0.0
+_fallback_triggered: bool = False
 _search_lock = asyncio.Lock()
 
 SKIP_FETCH_DOMAINS = {
@@ -199,7 +200,8 @@ async def fetch_page(session: AsyncSession, url: str) -> tuple[str, bool]:
 # ── DuckDuckGo search ────────────────────────────────────────────────────────
 
 async def ddg_search(session: AsyncSession, query: str, num: int, region: str = "wt-wt") -> list[dict]:
-    global _last_search_time
+    global _last_search_time, _fallback_triggered
+    _fallback_triggered = False
 
     log.info("Searching for '%s' (region=%s, count=%d)", query, region, num)
 
@@ -303,6 +305,7 @@ def parse_html(html: str, num: int) -> list[dict]:
     log.debug("Lite parser found %d results", len(results))
 
     if not results:
+        _fallback_triggered = True
         log.warning("Lite parser returned 0 results, falling back to legacy parser")
         result_elements = soup.select(".result, .results_links, .result__body")
         for el in result_elements:
@@ -357,7 +360,14 @@ async def search(query: str, count: int = 10, region: str = "wt-wt") -> str:
             results = await ddg_search(session, query, count, region=region)
             if not results:
                 log.warning("No results for '%s' (region=%s)", query, region)
-                return f"No results found for: {query}"
+                msg = f"No results found for: {query}"
+                if _fallback_triggered:
+                    msg += (
+                        "\n\n⚠️  DuckDuckGo may have changed their HTML structure."
+                        "\n    If searches fail consistently, report at:"
+                        "\n    https://github.com/Albertous007/ddg-search-mcp/issues"
+                    )
+                return msg
 
             fetch_tasks = [fetch_page(session, r["url"]) for r in results]
             page_data = await asyncio.gather(*fetch_tasks)
