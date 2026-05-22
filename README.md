@@ -11,6 +11,8 @@ DuckDuckGo Search MCP Server. Scrapes DuckDuckGo Lite directly — no API key re
 - **Concurrent Processing**: Page content is fetched in parallel to minimize latency.
 - **Full Region Support**: Real support for regional searches (e.g., `es-es` for Spain, `mx-es` for Mexico) using the native DuckDuckGo `kl` parameter.
 - **Zero Configuration**: No API keys, accounts, or complex setup required.
+- **Structured Logging**: All server activity logs to stderr with configurable verbosity (INFO default).
+- **Environment Configuration**: All constants tunable via environment variables (see `.env.example`).
 
 ## Installation
 
@@ -82,6 +84,22 @@ With `uvx` (auto-installs dependencies):
 | `count`   | No       | 10      | Max results (1–20) |
 | `region`  | No       | wt-wt   | Region: wt-wt (global), us-en (USA), es-es (Spain), etc. |
 
+## Environment Variables
+
+All settings are optional — defaults are shown below.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DDG_LOG_LEVEL` | `INFO` | Log level: `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `DDG_SEARCH_DELAY` | `3.0` | Min seconds between search requests |
+| `DDG_MAX_CONTENT_CHARS` | `6000` | Max chars of page content per result |
+| `DDG_MAX_SNIPPET_CHARS` | `400` | Max chars of snippet fallback |
+| `DDG_PAGE_FETCH_TIMEOUT` | `8.0` | Timeout (s) for fetching result pages |
+| `DDG_SEARCH_TIMEOUT` | `12.0` | Timeout (s) for the search request itself |
+| `DDG_MAX_RESULTS` | `10` | Max results returned per search (1–10) |
+
+Copy `.env.example` to `.env` and customize, or set them directly in your environment.
+
 ## Cross-platform
 
 Works on Windows, Linux, and macOS. Requires only Python 3.10+.
@@ -110,6 +128,7 @@ This MCP scrapes DuckDuckGo's HTML directly. If DDG changes their HTML structure
 
 ```bash
 pip install -r requirements.txt
+cp .env.example .env   # optional: tweak settings
 python server.py
 ```
 
