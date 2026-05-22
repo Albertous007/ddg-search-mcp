@@ -1,76 +1,92 @@
 # ddg-search-mcp
 
-DuckDuckGo Search MCP Server. Scrapes DuckDuckGo Lite directly — no API key required. Highly robust against bot detection.
+[![PyPI version](https://img.shields.io/pypi/v/ddg-search-mcp)](https://pypi.org/project/ddg-search-mcp/)
+[![Python versions](https://img.shields.io/pypi/pyversions/ddg-search-mcp)](https://pypi.org/project/ddg-search-mcp/)
+[![License](https://img.shields.io/pypi/l/ddg-search-mcp)](LICENSE)
+
+DuckDuckGo Search MCP Server. Scrapes DuckDuckGo Lite directly — no API key required, no rate limits, robust anti-bot protection.
+
+## Quick Start
+
+```bash
+pip install ddg-search-mcp
+# or
+uvx ddg-search-mcp
+```
+
+Add to your MCP client:
+
+```json
+{
+    "mcpServers": {
+        "ddg-search": {
+            "command": "uvx",
+            "args": ["ddg-search-mcp"]
+        }
+    }
+}
+```
 
 ## Features
 
 - **Advanced Anti-bot Protection**: Uses `curl_cffi` to mimic a real Chrome 131 TLS fingerprint (JA3), seamlessly bypassing most bot detection and CAPTCHA systems.
-- **DuckDuckGo Lite**: Leverages the Lite version of DuckDuckGo for faster parsing and significantly higher reliability compared to the standard HTML version.
-- **Smart Rate Limiting & Retries**: Integrated 3.0s delay between searches and automatic retry logic to ensure stable results even during intensive use.
+- **Dual Parser Engine**: Primary parser for DuckDuckGo Lite HTML, with automatic legacy fallback if the structure changes.
+- **Parser Health Warning**: If the primary parser fails and no results are found, a warning is included in the output with a link to report the issue.
 - **Full Content Extraction**: Deep extraction of page content via `trafilatura` (with automatic snippet fallback on fetch failure).
 - **Concurrent Processing**: Page content is fetched in parallel to minimize latency.
-- **Full Region Support**: Real support for regional searches (e.g., `es-es` for Spain, `mx-es` for Mexico) using the native DuckDuckGo `kl` parameter.
+- **Full Region Support**: Regional searches (e.g., `es-es` for Spain, `mx-es` for Mexico) using the native DuckDuckGo `kl` parameter.
 - **Zero Configuration**: No API keys, accounts, or complex setup required.
-- **Structured Logging**: All server activity logs to stderr with configurable verbosity (INFO default).
+- **Structured Logging**: All server activity logs to stderr with configurable verbosity.
 - **Environment Configuration**: All constants tunable via environment variables (see `.env.example`).
-- **Parser Health Warning**: If the Lite parser fails and no results are found, a warning is included in the output with a link to report the issue.
+
+> **No SafeSearch filter**
+>
+> This server does **not** implement SafeSearch filtering. All search results
+> are returned as-is from DuckDuckGo. If you need content filtering, consider
+> [nickclyde/duckduckgo-mcp-server](https://github.com/nickclyde/duckduckgo-mcp-server)
+> which supports `DDG_SAFE_SEARCH=STRICT | MODERATE | OFF`.
+>
+> This is a deliberate design choice — keeping the server simple, fast,
+> and without feature creep.
 
 ## Installation
 
-### Standard (recommended)
+### From PyPI (recommended)
+
+```bash
+pip install ddg-search-mcp
+```
+
+### From source
 
 ```bash
 git clone https://github.com/Albertous007/ddg-search-mcp.git
 cd ddg-search-mcp
-pip install -r requirements.txt
-```
-
-### Alternative: using `uvx`
-
-If you have [`uv`](https://docs.astral.sh/uv/) installed:
-
-```bash
-pip install uv   # one-time setup
-```
-
-Then use `uvx` directly in your config (no clone or pip install needed):
-
-```json
-{
-    "mcp": {
-        "ddg-search": {
-            "type": "local",
-            "command": ["uvx", "--from", "git+https://github.com/Albertous007/ddg-search-mcp@main", "python", "-m", "server"],
-            "enabled": true
-        }
-    }
-}
+pip install -e .
 ```
 
 ## Usage with opencode
 
-Standard installation:
-
 ```json
 {
     "mcp": {
         "ddg-search": {
             "type": "local",
-            "command": ["python", "path\\to\\ddg-search-mcp\\server.py"],
+            "command": ["python", "-m", "ddg_search_mcp"],
             "enabled": true
         }
     }
 }
 ```
 
-With `uvx` (auto-installs dependencies):
+### With `uvx`
 
 ```json
 {
     "mcp": {
         "ddg-search": {
             "type": "local",
-            "command": ["uvx", "--from", "git+https://github.com/Albertous007/ddg-search-mcp@main", "python", "-m", "server"],
+            "command": ["uvx", "ddg-search-mcp"],
             "enabled": true
         }
     }
@@ -103,13 +119,7 @@ Copy `.env.example` to `.env` and customize, or set them directly in your enviro
 
 ## Cross-platform
 
-Works on Windows, Linux, and macOS. Requires only Python 3.10+.
-
-| OS | Setup |
-|----|-------|
-| Windows | `pip install -r requirements.txt` |
-| Linux | `pip install -r requirements.txt` |
-| macOS | `pip install -r requirements.txt` |
+Works on Windows, Linux, and macOS. Requires Python 3.10+.
 
 ## Known Issues
 
@@ -119,11 +129,11 @@ DuckDuckGo aggressively rate-limits requests from a single IP. This MCP uses **D
 
 **Symptoms:** The tool returns `No results found` for all queries.
 
-**Fix:** If blocked, wait a few minutes. The rate limit expires automatically. The current 3.0s delay is designed to prevent this under normal usage.
+**Fix:** If blocked, wait a few minutes. The rate limit expires automatically.
 
 ### HTML structure changes
 
-This MCP scrapes DuckDuckGo's HTML directly. If DDG changes their HTML structure, the parsing logic in `server.py` may need to be updated.
+This MCP scrapes DuckDuckGo's HTML directly. If DDG changes their HTML structure, the parsing logic may need to be updated.
 
 When a search returns no results and the parser structure is suspected to have changed, the output includes a warning:
 
@@ -138,25 +148,41 @@ This warning only appears when both the primary and fallback parsers fail to ext
 ## Development
 
 ```bash
-pip install -r requirements.txt
+git clone https://github.com/Albertous007/ddg-search-mcp.git
+cd ddg-search-mcp
+pip install -e .
 cp .env.example .env   # optional: tweak settings
-python server.py
+python -m ddg_search_mcp
 ```
 
 Test with MCP Inspector:
 
 ```bash
 pip install mcp[cli]
-mcp dev server.py
+mcp dev src/ddg_search_mcp/server.py
+```
+
+Run unit tests:
+
+```bash
+pip install pytest
+pytest
 ```
 
 ## Requirements
 
 - Python 3.10+
-- `curl_cffi` (Advanced HTTP client with TLS fingerprinting)
+- `curl_cffi` (HTTP client with TLS fingerprinting)
 - `beautifulsoup4` (HTML parsing)
 - `trafilatura` (content extraction)
 - `mcp` (MCP Python SDK)
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+This is a personal project maintained by [@Albertous007](https://github.com/Albertous007).
+If the repository becomes unmaintained, anyone is welcome to fork it.
 
 ## License
 

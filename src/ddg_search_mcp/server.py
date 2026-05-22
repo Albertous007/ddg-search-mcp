@@ -272,6 +272,7 @@ def is_ad_element(tag) -> bool:
 
 
 def parse_html(html: str, num: int) -> list[dict]:
+    global _fallback_triggered
     soup = BeautifulSoup(html, "html.parser")
     results = []
 
@@ -349,7 +350,7 @@ async def search(query: str, count: int = 10, region: str = "wt-wt") -> str:
 
     Args:
         query: Search terms.
-        count: Max results (1–20, default 10).
+        count: Max results (1-20, default 10).
         region: Region code (wt-wt = global, us-en = USA, es-es = Spain, etc.).
     """
     count = max(1, min(count, MAX_RESULTS_CAP))
@@ -363,7 +364,7 @@ async def search(query: str, count: int = 10, region: str = "wt-wt") -> str:
                 msg = f"No results found for: {query}"
                 if _fallback_triggered:
                     msg += (
-                        "\n\n⚠️  DuckDuckGo may have changed their HTML structure."
+                        "\n\n\u26a0\ufe0f  DuckDuckGo may have changed their HTML structure."
                         "\n    If searches fail consistently, report at:"
                         "\n    https://github.com/Albertous007/ddg-search-mcp/issues"
                     )
@@ -406,5 +407,10 @@ async def search(query: str, count: int = 10, region: str = "wt-wt") -> str:
         return f"Search failed: {e}"
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point for the MCP server."""
     mcp.run(transport="stdio")
+
+
+if __name__ == "__main__":
+    main()
