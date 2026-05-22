@@ -14,6 +14,14 @@ pip install ddg-search-mcp
 uvx ddg-search-mcp
 ```
 
+### From source (before PyPI release)
+
+```bash
+git clone https://github.com/Albertous007/ddg-search-mcp.git
+cd ddg-search-mcp
+pip install -e .
+```
+
 Add to your MCP client:
 
 ```json
@@ -66,6 +74,22 @@ pip install -e .
 ```
 
 ## Usage with opencode
+
+After `pip install`, the installed console script is the simplest option:
+
+```json
+{
+    "mcp": {
+        "ddg-search": {
+            "type": "local",
+            "command": ["ddg-search-mcp"],
+            "enabled": true
+        }
+    }
+}
+```
+
+### With `python -m`
 
 ```json
 {
