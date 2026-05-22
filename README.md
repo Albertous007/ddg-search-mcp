@@ -82,7 +82,7 @@ With `uvx` (auto-installs dependencies):
 | Parameter | Required | Default | Description |
 |-----------|----------|---------|-------------|
 | `query`   | Yes      | —       | Search terms |
-| `count`   | No       | 10      | Max results (1–20) |
+| `count`   | No       | 10      | Max results (1–10, configurable via `DDG_MAX_RESULTS`) |
 | `region`  | No       | wt-wt   | Region: wt-wt (global), us-en (USA), es-es (Spain), etc. |
 
 ## Environment Variables
