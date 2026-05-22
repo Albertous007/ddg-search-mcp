@@ -13,6 +13,7 @@ DuckDuckGo Search MCP Server. Scrapes DuckDuckGo Lite directly — no API key re
 - **Zero Configuration**: No API keys, accounts, or complex setup required.
 - **Structured Logging**: All server activity logs to stderr with configurable verbosity (INFO default).
 - **Environment Configuration**: All constants tunable via environment variables (see `.env.example`).
+- **Parser Health Warning**: If the Lite parser fails and no results are found, a warning is included in the output with a link to report the issue.
 
 ## Installation
 
@@ -123,6 +124,16 @@ DuckDuckGo aggressively rate-limits requests from a single IP. This MCP uses **D
 ### HTML structure changes
 
 This MCP scrapes DuckDuckGo's HTML directly. If DDG changes their HTML structure, the parsing logic in `server.py` may need to be updated.
+
+When a search returns no results and the parser structure is suspected to have changed, the output includes a warning:
+
+```
+⚠️  DuckDuckGo may have changed their HTML structure.
+    If searches fail consistently, report at:
+    https://github.com/Albertous007/ddg-search-mcp/issues
+```
+
+This warning only appears when both the primary and fallback parsers fail to extract results.
 
 ## Development
 
