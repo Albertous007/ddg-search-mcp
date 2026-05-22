@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ddg-search-mcp"
-version = "1.0.0"
+version = "1.0.1"
 authors = [{ name = "Albertous007" }]
 description = "DuckDuckGo Search MCP Server with anti-bot protection"
 readme = "README.md"
